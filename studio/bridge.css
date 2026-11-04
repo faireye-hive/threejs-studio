@@ -1,0 +1,15 @@
+#studio-panel{position:fixed;top:10px;right:330px;z-index:99999;color:#edf1fb;font:13px system-ui,Arial,sans-serif;max-width:calc(100vw - 16px)}
+#studio-panel *{box-sizing:border-box}
+#studio-panel button{border:1px solid #43526d;border-radius:7px;background:#263c5c;color:#fff;padding:7px 10px;cursor:pointer}
+#studio-panel button:disabled{opacity:.5;cursor:default}
+#studio-toggle{font-weight:700}
+#studio-panel section{width:320px;max-width:100%;padding:15px;margin-top:8px;background:#161f30;border:1px solid #415069;border-radius:12px;box-shadow:0 8px 35px #0009}
+#studio-panel section[hidden]{display:none}
+#studio-panel label{display:block;color:#cdd8ea;margin-top:12px}
+#studio-panel input{display:block;margin-top:5px;width:100%;padding:9px;background:#0e1523;color:white;border:1px solid #485971;border-radius:6px;font:inherit}
+#studio-panel nav{display:flex;gap:8px;margin-top:14px}
+#studio-status{overflow-wrap:anywhere;line-height:1.5;font-size:12px}
+#studio-panel small{color:#adbed6}
+#studio-led{color:#df8669}
+#studio-led.connected{color:#58dc93}
+@media(max-width:950px){#studio-panel{right:8px;top:auto;bottom:8px}#studio-panel section{max-height:65vh;overflow:auto}}

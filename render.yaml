@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: threejs-studio-api
+    runtime: node
+    plan: free
+    buildCommand: echo "No packages to install"
+    startCommand: node server/index.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: STUDIO_TOKEN
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://faireye-hive.github.io
