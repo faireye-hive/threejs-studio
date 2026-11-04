@@ -26,10 +26,14 @@ jobs:
         run: |
           node --check server/index.mjs
           node --check studio/bridge.js
+          node --check control/app.js
           python3 -m py_compile scripts/build_site.py
           node --test server/server.test.mjs
       - name: Assemble static site
-        run: python3 scripts/build_site.py upstream public
+        run: |
+          python3 scripts/build_site.py upstream public
+          test -f public/control/index.html
+          test -f public/editor/index.html
       - uses: actions/configure-pages@v5
         with:
           enablement: true
