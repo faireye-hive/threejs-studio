@@ -22,9 +22,17 @@ jobs:
         run: |
           git clone --depth 1 --filter=blob:none --sparse --branch dev https://github.com/mrdoob/three.js.git upstream
           git -C upstream sparse-checkout set editor build examples/jsm examples/fonts files
+      - name: Check JavaScript and Python syntax
+        run: |
+          node --check server/index.mjs
+          node --check studio/bridge.js
+          python3 -m py_compile scripts/build_site.py
+          node --test server/server.test.mjs
       - name: Assemble static site
         run: python3 scripts/build_site.py upstream public
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: public
