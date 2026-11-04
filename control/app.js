@@ -171,6 +171,20 @@ $('delete').addEventListener('click', async () => {
     await send({action:'delete',objectId});
   }catch(e){message(e.message,'error');}
 });
+$('submit-scene-file').addEventListener('click', async () => {
+  try {
+    const file=$('scene-file').files?.[0];
+    if(!file) throw Error('Escolha um arquivo JSON de construção.');
+    if(file.size>19*1024*1024) throw Error('O arquivo precisa ter menos de 19 MiB.');
+    const command=JSON.parse(await file.text());
+    if(!command||Array.isArray(command)||command.action!=='build_scene'||!Array.isArray(command.objects))
+      throw Error('O JSON precisa conter action: "build_scene" e uma lista objects.');
+    const result=await request('/api/commands','POST',{...command,project:session.project});
+    commandOutput(result);
+    message('Cena enviada: '+result.objectsCreated+' peças, '+result.vertexCount+' vértices. Aguardando o editor.','ok');
+    setTimeout(()=>refresh(true),1500);
+  }catch(e){message('Falha ao construir cena: '+e.message,'error');}
+});
 $('submit-json').addEventListener('click', async () => {
   try {
     const parsed=JSON.parse($('commands-json').value);

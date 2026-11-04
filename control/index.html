@@ -76,6 +76,12 @@
 ]</textarea>
       </label>
       <div class="actions"><button id="submit-json" type="button" class="action" disabled>Enviar comandos JSON</button></div>
+      <hr>
+      <label>Arquivo de construção completa (.json)
+        <input id="scene-file" type="file" accept=".json,application/json">
+      </label>
+      <p class="muted">Envie um comando `build_scene` para criar a montagem inteira, inclusive malhas customizadas. O arquivo é enviado diretamente à API autenticada do projeto.</p>
+      <div class="actions"><button id="submit-scene-file" type="button" class="action" disabled>Construir cena pelo arquivo JSON</button></div>
       <pre id="command-output" role="status" aria-live="polite">Nenhum comando enviado.</pre>
     </section>
   </main>

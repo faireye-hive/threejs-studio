@@ -49,7 +49,7 @@ Esta página é um controle REST autenticado independente, que **não abre um se
 2. Inicie um chat **Work** e peça para abrir a URL `/control/`.
 3. Quando a página pedir o token, insira o mesmo `STUDIO_TOKEN` no formulário do navegador do Work usando a etapa segura disponível; **não envie o token no chat**.
 4. Peça ao Work: "Crie uma esfera chamada Teste Work na posição 0,1,0, no projeto main. Verifique se o comando foi confirmado."
-5. A página também permite modificar objetos e enviar até 30 comandos JSON validados pela API. Um único comando `build_scene` pode criar milhares de peças e malhas personalizadas de uma vez.
+5. A página também permite modificar objetos e enviar até 30 comandos JSON validados pela API. Para uma montagem grande, selecione um arquivo JSON `build_scene` em **Construir cena pelo arquivo JSON**; isso envia o modelo completo em um único lote.
 
 O Work usa sua capacidade de navegar e preencher formulários, **não** as ferramentas MCP diretamente. Para MCP remoto nativo com ações de escrita, verifique a elegibilidade do plano ChatGPT. Sem o token válido o controlador não executa comandos. O token fica somente na memória da página, sendo apagado ao desconectar; não é gravado em localStorage, URL ou arquivos.
 
@@ -76,7 +76,7 @@ curl -X POST https://SEU-SERVIDOR.onrender.com/api/commands \
 
 ### Construir modelos completos por API
 
-Envie um `build_scene` em `POST /api/commands` para criar a montagem em um único lote. Cada peça pode ser uma primitiva (`shape`) ou uma malha (`shape: "mesh"`) com arrays `positions` e `indices`; transformações, nome de grupo, cor, rugosidade e metalicidade também são aceitos. UVs e cores por vértice podem ser usados em malhas customizadas.
+Envie um `build_scene` em `POST /api/commands` ou selecione o arquivo JSON no painel Work Control para criar a montagem em um único lote. Cada peça pode ser uma primitiva (`shape`) ou uma malha (`shape: "mesh"`) com arrays `positions` e `indices`; transformações, nome de grupo, cor, rugosidade e metalicidade também são aceitos. UVs e cores por vértice podem ser usados em malhas customizadas.
 
 ```json
 {
