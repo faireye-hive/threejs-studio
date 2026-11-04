@@ -47,7 +47,7 @@ Crie um Blueprint no Render usando o `render.yaml`, ou Web Service Node:
 - `ALLOWED_ORIGINS`: `https://faireye-hive.github.io`.
 - Porta é definida por `PORT` no Render.
 
-Abra o painel **API / IA** no editor. Informe o domínio HTTPS do serviço, o token e o nome do projeto (`main` por padrão). O token não é persistido no browser após recarregar a página.
+Abra o painel **API / IA** no editor. Informe o domínio HTTPS do serviço, o token e o nome do projeto (`main` por padrão). O token não é persistido no browser após recarregar a página. Para testar sem terminal, conecte e clique em **Criar esfera de teste**; o objeto aparecerá no viewport após a API confirmar o comando.
 
 ### Comando REST de exemplo
 ```bash

@@ -26,6 +26,7 @@ panel.innerHTML = `
   <label>STUDIO_TOKEN<input id="studio-token" type="password" autocomplete="off" spellcheck="false"></label>
   <label>Projeto<input id="studio-project" type="text" value="main" maxlength="64"></label>
   <nav><button id="studio-connect" type="button">Conectar</button><button id="studio-disconnect" type="button" disabled>Desconectar</button></nav>
+  <nav><button id="studio-test" type="button" disabled>Criar esfera de teste</button></nav>
   <p id="studio-status" role="status">Desconectado.</p>
   <small>O token permite editar sua cena. Não divulgue nem insira no código público.</small>
  </section>`;
@@ -33,10 +34,10 @@ document.body.append(panel);
 const $ = id => panel.querySelector('#' + id);
 const toggle = $('studio-toggle'), config = $('studio-config'), status = $('studio-status');
 const url = $('studio-url'), token = $('studio-token'), project = $('studio-project');
-const connectBtn = $('studio-connect'), disconnectBtn = $('studio-disconnect'), led = $('studio-led');
+const connectBtn = $('studio-connect'), disconnectBtn = $('studio-disconnect'), testBtn = $('studio-test'), led = $('studio-led');
 try {
   const saved = JSON.parse(sessionStorage.getItem('threejs-studio') || '{}');
-  url.value = saved.url || '';
+  url.value = saved.url || 'https://threejs-studio-api.onrender.com';
   project.value = saved.project || 'main';
 } catch {}
 toggle.addEventListener('click', () => {
@@ -149,7 +150,7 @@ async function handle(c, cmd) {
 async function stream(c) {
   const response = await call(c, '/api/projects/' + c.project + '/events', 'GET', undefined, c.controller.signal);
   if (!response.body) throw Error('SSE indisponível');
-  c.connected = true; note('Conectado à API.', true); syncSoon();
+  c.connected = true; testBtn.disabled = false; note('Conectado à API.', true); syncSoon();
   const reader = response.body.getReader(), decoder = new TextDecoder();
   let buf = '';
   while (connection === c && !c.controller.signal.aborted) {
@@ -169,7 +170,7 @@ async function stream(c) {
 }
 function disconnect() {
   connection?.controller.abort(); connection = null;
-  clearTimeout(syncTimeout); connectBtn.disabled = false; disconnectBtn.disabled = true;
+  clearTimeout(syncTimeout); connectBtn.disabled = false; disconnectBtn.disabled = true; testBtn.disabled = true;
   note('Desconectado.');
 }
 async function connect() {
@@ -189,7 +190,7 @@ async function connect() {
       try { await stream(c); retry = 1500; }
       catch (e) {
         if (c.controller.signal.aborted) break;
-        c.connected = false; note('Conexão: ' + e.message);
+        c.connected = false; testBtn.disabled = true; note('Conexão: ' + e.message);
         if (/HTTP 401|HTTP 403/.test(e.message)) break;
       }
       if (c.controller.signal.aborted) break;
@@ -200,4 +201,24 @@ async function connect() {
 }
 connectBtn.addEventListener('click', connect);
 disconnectBtn.addEventListener('click', disconnect);
+testBtn.addEventListener('click', async () => {
+  const c = connection;
+  if (!c?.connected) return;
+  testBtn.disabled = true;
+  try {
+    const response = await call(c, '/api/commands', 'POST', {
+      project: c.project,
+      action: 'create',
+      shape: 'sphere',
+      name: 'Esfera de teste (API)',
+      position: [0, 1, 0],
+      scale: [1, 1, 1],
+      color: '#5fc4ee'
+    });
+    const result = await response.json();
+    note('Comando enviado: ' + result.commandId.slice(0, 8) + '. Aguardando aplicação...', true);
+  } catch (e) {
+    note('Falha ao criar esfera: ' + e.message);
+  } finally { testBtn.disabled = !c.connected || connection !== c; }
+});
 window.threejsStudio = { inventory, isConnected: () => !!connection?.connected };
