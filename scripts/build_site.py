@@ -19,6 +19,15 @@ for name in ("favicon.ico", "favicon_white.ico"):
         dest = output / "files" / name
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dest)
+# Apply project-owned overrides after copying the pristine upstream snapshot.
+# Only modified files are stored in Git, not the full Three.js distribution.
+for rel in ("editor", "build", "examples/jsm", "examples/fonts"):
+    override = Path("custom") / rel
+    if override.is_dir():
+        shutil.copytree(override, output / rel, dirs_exist_ok=True)
+        print(f"Applied overrides from {override}")
+
+# These integration files always come from the maintained Studio bridge.
 for suffix in ("js", "css"):
     shutil.copy2(Path("studio") / f"bridge.{suffix}", output / "editor" / f"bridge.{suffix}")
 index = output / "editor" / "index.html"

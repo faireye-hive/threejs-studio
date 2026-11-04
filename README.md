@@ -9,6 +9,37 @@ Editor oficial do [Three.js](https://threejs.org/editor/) com uma ponte para API
 2. Em **Actions**, execute **Publish Three.js Studio** se necessário.
 3. Abra **https://faireye-hive.github.io/threejs-studio/**.
 
+## Modificando o editor original (sem importar todo o Three.js)
+
+As modificações permanentes ficam em `custom/`, não em `upstream/`, porque `upstream/` é ignorado pelo Git e baixado novamente em cada build.
+
+No Codespaces, com o clone superficial em `upstream/`, crie uma substituição editável para qualquer arquivo do editor:
+
+```bash
+bash scripts/capture_override.sh editor/js/Viewport.js
+# Agora edite custom/editor/js/Viewport.js no VS Code.
+python3 scripts/build_site.py upstream public
+python3 -m http.server 8000 -d public
+```
+
+A etapa de build segue esta ordem:
+1. Copia os arquivos oficiais de `upstream/` para `public/`.
+2. Sobrepõe os arquivos personalizados de `custom/editor/`, `custom/build/` e `custom/examples/`.
+3. Injeta e preserva a integração MCP/API do Studio.
+
+Assim, apenas **os arquivos realmente modificados** entram nos commits do projeto. É possível alterar o `index.html` original, `Viewport.js`, menus, sidebar, ferramentas e módulos do Three.js.
+
+Se você já alterou um arquivo diretamente em `upstream/`, execute `bash scripts/capture_override.sh editor/js/NOME.js` **antes** de encerrar o Codespaces; o script copia a versão alterada para `custom/`. Caso haja um override existente, o script não o sobrescreve.
+
+Depois de testar:
+```bash
+git add custom/ scripts/ README.md
+git commit -m "Personalizar editor 3D"
+git push
+```
+
+**Atenção:** mudanças no branch `dev` do Three.js podem exigir ajustes nos arquivos personalizados no futuro. Para desenvolvimento mais estável, podemos fixar um commit/tag específico do upstream. A ponte `studio/bridge.js` e `bridge.css` continuam sob controle próprio e são aplicadas por último.
+
 ## API no Render
 Crie um Blueprint no Render usando o `render.yaml`, ou Web Service Node:
 - Start command: `node server/index.mjs`
