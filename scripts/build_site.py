@@ -40,5 +40,7 @@ index.write_text(html, encoding="utf-8")
 license = upstream / "LICENSE"
 if license.exists():
     shutil.copy2(license, output / "THREEJS_LICENSE.txt")
+# Static Work Cloud Browser control panel, separate from the editor session.
+shutil.copytree(Path("control"), output / "control", dirs_exist_ok=True)
 (output / ".nojekyll").touch()
 print(f"Assembled {output} successfully")

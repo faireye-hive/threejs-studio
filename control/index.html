@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Work Control — Three.js Studio</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" type="module"></script>
+</head>
+<body>
+  <header class="top">
+    <div><span class="eyebrow">THREE.JS STUDIO / REMOTE API</span><h1>Work Control <small>v1</small></h1>
+      <p>Controle seus objetos 3D pelo navegador. O editor pode ficar aberto em outra janela ou dispositivo.</p></div>
+    <a class="linkbtn" href="../editor/" target="_blank" rel="noopener">Abrir editor 3D ↗</a>
+  </header>
+  <main>
+    <section class="card">
+      <h2>1. Conectar ao projeto</h2>
+      <p class="muted">API: <code>https://threejs-studio-api.onrender.com</code>. O token não é enviado para o GitHub e não é salvo neste navegador.</p>
+      <form id="login-form" class="form-grid">
+        <label>Projeto<input id="project" type="text" value="main" maxlength="64" pattern="[A-Za-z0-9_-]+" required></label>
+        <label>STUDIO_TOKEN<input id="token" type="password" autocomplete="off" minlength="8" required placeholder="Insira diretamente nesta página"></label>
+        <div class="actions"><button type="submit">Conectar</button><button type="button" class="secondary" id="disconnect" disabled>Desconectar</button></div>
+      </form>
+      <p id="status" role="status" class="status">Não conectado.</p>
+      <p class="muted tiny">Se estiver usando o ChatGPT Work, insira o token pela etapa segura de controle do navegador, sem colá-lo no chat.</p>
+    </section>
+    <section class="card">
+      <div class="section-title"><h2>2. Estado da cena</h2><button id="refresh" class="secondary" type="button" disabled>Atualizar cena</button></div>
+      <div class="stats" aria-live="polite"><div><strong id="online">—</strong><span>Editores conectados</span></div><div><strong id="count">—</strong><span>Objetos na cena</span></div><div><strong id="pending">—</strong><span>Comandos pendentes</span></div></div>
+      <p id="ack" class="muted tiny">Última confirmação: —</p>
+      <p class="muted tiny">Para ver mudanças ao vivo, mantenha o editor conectado ao projeto <code>main</code> com o mesmo token.</p>
+      <div id="objects" class="objects" aria-live="polite"><p class="muted">Conecte para consultar os objetos da cena.</p></div>
+    </section>
+    <section class="card" id="create-card">
+      <h2>3. Criar objeto</h2>
+      <form id="create-form">
+        <div class="form-grid">
+          <label>Geometria<select id="shape"><option value="sphere">Esfera</option><option value="box">Cubo</option><option value="cylinder">Cilindro</option><option value="cone">Cone</option><option value="torus">Torus</option><option value="plane">Plano</option></select></label>
+          <label>Nome<input id="object-name" value="Objeto criado pelo Work" maxlength="80" required></label>
+          <label>Posição X, Y, Z<input id="position" value="0, 1, 0" aria-label="Posição X Y Z" required></label>
+          <label>Escala X, Y, Z<input id="scale" value="1, 1, 1" required></label>
+          <label>Cor<input id="color" type="color" value="#64b5ed"></label>
+        </div>
+        <div class="actions"><button type="submit" class="action" disabled>Criar objeto na cena</button></div>
+      </form>
+    </section>
+    <section class="card">
+      <h2>4. Modificar objeto</h2>
+      <p class="muted">Clique em <b>Selecionar</b> na lista acima ou informe um UUID existente.</p>
+      <form id="modify-form">
+        <label>ID do objeto<input id="object-id" type="text" placeholder="UUID do objeto na cena" required></label>
+        <div class="form-grid">
+          <label>Nova posição X, Y, Z (opcional)<input id="new-position" placeholder="0, 2, 0"></label>
+          <label>Nova escala X, Y, Z (opcional)<input id="new-scale" placeholder="1, 1, 1"></label>
+          <label>Nova rotação em radianos (opcional)<input id="new-rotation" placeholder="0, 0, 0"></label>
+          <label>Novo nome (opcional)<input id="new-name" maxlength="80" placeholder="Nome atualizado"></label>
+          <label>Nova cor (opcional)<input id="new-color" placeholder="#aabbcc"></label>
+        </div>
+        <div class="actions">
+          <button type="button" id="transform" class="action" disabled>Aplicar transformação</button>
+          <button type="button" id="rename" class="action secondary" disabled>Renomear</button>
+          <button type="button" id="recolor" class="action secondary" disabled>Alterar cor</button>
+          <button type="button" id="delete" class="action danger" disabled>Excluir objeto</button>
+        </div>
+      </form>
+    </section>
+    <section class="card">
+      <h2>5. Comandos JSON (avançado)</h2>
+      <p class="muted">O Work pode enviar vários comandos de uma vez (máximo 30). Os comandos usam a API autenticada e passam pela validação do servidor.</p>
+      <label>Comandos JSON, objeto ou lista de objetos
+        <textarea id="commands-json" rows="8" spellcheck="false">[
+  {"action":"create","shape":"sphere","name":"Cabeça","position":[0,2,0],"scale":[0.7,0.8,0.7],"color":"#e9bda5"},
+  {"action":"create","shape":"box","name":"Corpo","position":[0,1,0],"scale":[0.8,1.3,0.45],"color":"#435c93"}
+]</textarea>
+      </label>
+      <div class="actions"><button id="submit-json" type="button" class="action" disabled>Enviar comandos JSON</button></div>
+      <pre id="command-output" role="status" aria-live="polite">Nenhum comando enviado.</pre>
+    </section>
+  </main>
+  <footer>Projeto: <a href="https://github.com/faireye-hive/threejs-studio" rel="noopener" target="_blank">faireye-hive/threejs-studio</a> · O controlador não abre uma segunda instância do editor.</footer>
+</body>
+</html>

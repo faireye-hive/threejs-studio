@@ -40,6 +40,19 @@ git push
 
 **Atenção:** mudanças no branch `dev` do Three.js podem exigir ajustes nos arquivos personalizados no futuro. Para desenvolvimento mais estável, podemos fixar um commit/tag específico do upstream. A ponte `studio/bridge.js` e `bridge.css` continuam sob controle próprio e são aplicadas por último.
 
+## Controle pelo ChatGPT Work (navegador na nuvem)
+
+Abra `https://faireye-hive.github.io/threejs-studio/control/` no Work.
+Esta página é um controle REST autenticado independente, que **não abre um segundo editor**. Por isso você pode manter o Three.js Editor conectado no seu próprio navegador, no mesmo projeto `main`.
+
+1. No navegador normal, abra o editor, clique em **API / IA** e mantenha-o **Conectado**.
+2. Inicie um chat **Work** e peça para abrir a URL `/control/`.
+3. Quando a página pedir o token, insira o mesmo `STUDIO_TOKEN` no formulário do navegador do Work usando a etapa segura disponível; **não envie o token no chat**.
+4. Peça ao Work: "Crie uma esfera chamada Teste Work na posição 0,1,0, no projeto main. Verifique se o comando foi confirmado."
+5. A página também permite modificar objetos e enviar até 30 comandos JSON validados pela API.
+
+O Work usa sua capacidade de navegar e preencher formulários, **não** as ferramentas MCP diretamente. Para MCP remoto nativo com ações de escrita, verifique a elegibilidade do plano ChatGPT. Sem o token válido o controlador não executa comandos. O token fica somente na memória da página, sendo apagado ao desconectar; não é gravado em localStorage, URL ou arquivos.
+
 ## API no Render
 Crie um Blueprint no Render usando o `render.yaml`, ou Web Service Node:
 - Start command: `node server/index.mjs`
