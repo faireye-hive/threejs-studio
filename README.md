@@ -49,7 +49,7 @@ Esta página é um controle REST autenticado independente, que **não abre um se
 2. Inicie um chat **Work** e peça para abrir a URL `/control/`.
 3. Quando a página pedir o token, insira o mesmo `STUDIO_TOKEN` no formulário do navegador do Work usando a etapa segura disponível; **não envie o token no chat**.
 4. Peça ao Work: "Crie uma esfera chamada Teste Work na posição 0,1,0, no projeto main. Verifique se o comando foi confirmado."
-5. A página também permite modificar objetos e enviar até 30 comandos JSON validados pela API.
+5. A página também permite modificar objetos e enviar até 30 comandos JSON validados pela API. Um único comando `build_scene` pode criar milhares de peças e malhas personalizadas de uma vez.
 
 O Work usa sua capacidade de navegar e preencher formulários, **não** as ferramentas MCP diretamente. Para MCP remoto nativo com ações de escrita, verifique a elegibilidade do plano ChatGPT. Sem o token válido o controlador não executa comandos. O token fica somente na memória da página, sendo apagado ao desconectar; não é gravado em localStorage, URL ou arquivos.
 
@@ -72,10 +72,28 @@ curl -X POST https://SEU-SERVIDOR.onrender.com/api/commands \
 
 `GET /api/projects/main/scene` retorna inventário da cena e número de editores conectados. O navegador aplica os comandos via SSE e devolve ACK. Para alterar um objeto, use o `objectId` retornado na criação.
 
-**MCP (experimental):** `POST https://SEU-SERVIDOR.onrender.com/mcp`, com `Authorization: Bearer <STUDIO_TOKEN>`. Expõe `get_scene`, `create_object`, `transform_object`, `set_material`, `rename_object` e `delete_object`. Não oferece OAuth e não está validado no ChatGPT; a disponibilidade de ferramentas de escrita MCP depende do plano/cliente.
+**MCP (experimental):** `POST https://SEU-SERVIDOR.onrender.com/mcp`, com `Authorization: Bearer <STUDIO_TOKEN>`. Expõe `get_scene`, `create_object`, `build_scene`, `transform_object`, `set_material`, `rename_object` e `delete_object`. `build_scene` aceita primitivas e malhas triangulares arbitrárias com posições, índices, normais, UVs e cores por vértice. Não oferece OAuth e não está validado no ChatGPT; a disponibilidade de ferramentas de escrita MCP depende do plano/cliente.
 
-## Limitações do MVP
-- Comandos remotos: primitivas, transformação, materiais simples, renomeação e exclusão. **Não** há edição remota de vértices, rigging ou captura automática.
+### Construir modelos completos por API
+
+Envie um `build_scene` em `POST /api/commands` para criar a montagem em um único lote. Cada peça pode ser uma primitiva (`shape`) ou uma malha (`shape: "mesh"`) com arrays `positions` e `indices`; transformações, nome de grupo, cor, rugosidade e metalicidade também são aceitos. UVs e cores por vértice podem ser usados em malhas customizadas.
+
+```json
+{
+  "project": "main",
+  "action": "build_scene",
+  "name": "Personagem",
+  "objects": [
+    {"shape":"sphere","name":"Cabeça","group":"Corpo","position":[0,2,0],"scale":[0.7,0.8,0.7],"color":"#e9bda5"},
+    {"shape":"mesh","name":"Malha da roupa","group":"Roupa","positions":[-0.5,0,0, 0.5,0,0, 0,1,0],"indices":[0,1,2],"color":"#433866"}
+  ]
+}
+```
+
+Limites operacionais protegem o serviço Render: até 2.000 peças e 500.000 vértices por montagem, até 20 MiB por requisição e no máximo 100.000 vértices por malha. Isso permite enviar um modelo inteiro como uma única construção, sem dividir tudo em comandos isolados.
+
+## Limitações atuais
+- Malhas customizadas são estáticas: o endpoint aceita geometria, UVs e cores por vértice, mas ainda não aceita imagens de textura, esqueletos, pesos de skinning ou animações.
 - A API mantém dados e comandos pendentes apenas em memória. Ao reiniciar o Render, eles são perdidos. O salvamento do editor original permanece no navegador; exporte os projetos antes de limpar os dados locais.
 - Use o mesmo projeto em apenas um editor por vez nesta versão. Não há bloqueio de edição concorrente.
 - O upstream usado no build é o branch `dev`; mudanças futuras no editor podem exigir atualizar a ponte.

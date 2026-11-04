@@ -101,10 +101,52 @@ function primitive(shape) {
     case 'cone': return new THREE.ConeGeometry(.5, 1, 32);
     case 'plane': return new THREE.PlaneGeometry(1, 1);
     case 'torus': return new THREE.TorusGeometry(.5, .15, 12, 48);
+    case 'capsule': return new THREE.CapsuleGeometry(.35, .7, 6, 16);
+    case 'icosahedron': return new THREE.IcosahedronGeometry(.5, 1);
+    case 'octahedron': return new THREE.OctahedronGeometry(.5, 0);
+    case 'tetrahedron': return new THREE.TetrahedronGeometry(.5, 0);
+    case 'dodecahedron': return new THREE.DodecahedronGeometry(.5, 0);
+    case 'ring': return new THREE.RingGeometry(.25, .5, 32);
+    case 'circle': return new THREE.CircleGeometry(.5, 32);
     default: throw Error('Unknown shape');
   }
 }
+function customGeometry(item) {
+  if (item.shape !== 'mesh') return primitive(item.shape);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(item.positions, 3));
+  if (item.indices) geometry.setIndex(item.indices);
+  if (item.normals) geometry.setAttribute('normal', new THREE.Float32BufferAttribute(item.normals, 3));
+  else geometry.computeVertexNormals();
+  if (item.uvs) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(item.uvs, 2));
+  if (item.colors) geometry.setAttribute('color', new THREE.Float32BufferAttribute(item.colors, 3));
+  geometry.computeBoundingBox(); geometry.computeBoundingSphere();
+  return geometry;
+}
+function buildScene(cmd) {
+  const root = new THREE.Group(); root.uuid = cmd.objectId; root.name = cmd.name;
+  const groups = new Map();
+  for (const item of cmd.objects) {
+    let parent = root;
+    if (item.group) {
+      if (!groups.has(item.group)) { const group = new THREE.Group(); group.name = item.group; groups.set(item.group, group); root.add(group); }
+      parent = groups.get(item.group);
+    }
+    const material = new THREE.MeshStandardMaterial({ color:item.color, roughness:item.roughness ?? .7,
+      metalness:item.metalness ?? .05, vertexColors:!!item.colors,
+      side:['plane','ring','circle'].includes(item.shape) ? THREE.DoubleSide : THREE.FrontSide });
+    const mesh = new THREE.Mesh(customGeometry(item), material);
+    mesh.uuid = item.objectId; mesh.name = item.name;
+    mesh.position.fromArray(item.position); mesh.rotation.fromArray(item.rotation); mesh.scale.fromArray(item.scale);
+    parent.add(mesh);
+  }
+  return root;
+}
 function apply(cmd) {
+  if (cmd.action === 'build_scene') {
+    if (!getObject(cmd.objectId)) editor.execute(new AddObjectCommand(editor, buildScene(cmd)));
+    return;
+  }
   if (cmd.action === 'create') {
     if (getObject(cmd.objectId)) return;
     const geo = primitive(cmd.shape);
