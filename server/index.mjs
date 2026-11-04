@@ -184,7 +184,7 @@ export function createStudioServer({ token = process.env.STUDIO_TOKEN,
     if (origin && !allowedOrigins.includes(origin)) return json(res,403,{error:'Origin rejected'});
     let pathname;
     try { pathname = new URL(req.url, 'http://localhost').pathname; } catch { return json(res,400,{error:'Invalid URL'}); }
-    if (req.method === 'GET' && pathname === '/health') return json(res,200,{status:'ok',service:'threejs-studio'});
+    if (req.method === 'GET' && pathname === '/health') return json(res,200,{status:'ok',service:'threejs-studio',features:['build_scene','custom_mesh','vertex_colors','uv']});
     if (!auth(req, token)) return json(res,401,{error:'Unauthorized'});
     try {
       if (req.method === 'POST' && pathname === '/api/commands') {
